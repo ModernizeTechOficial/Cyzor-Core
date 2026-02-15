@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  cyzor-provisioning:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cyzor-provisioning
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    volumes:
+      - ./blueprints/node:/var/www/builds/node:ro
+      - cyzor-data:/var/www
+      - cyzor-builds:/var/www/builds
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      CYZOR_WEBHOOK_SECRET: cyzor_webhook_secret_2024
+      Provisioning__Host: 72.60.247.117
+      Provisioning__User: root
+      Provisioning__Password: A@ndr0m3d434513754
+      Provisioning__AppType: node
+      Provisioning__BuildsBasePath: /var/www/builds
+      Provisioning__AppsBasePath: /var/www
+      Logging__LogLevel__Default: Information
+    restart: unless-stopped
+    networks:
+      - cyzor-network
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.cyzor-provisioning.rule: "Host(`api.cyzor.com.br`)"
+      traefik.http.routers.cyzor-provisioning.entrypoints: "web,websecure"
+      traefik.http.services.cyzor-provisioning.loadbalancer.server.port: "5000"
+      traefik.http.routers.cyzor-provisioning.tls: "true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  cyzor-webhook:
+    image: mcr.microsoft.com/dotnet/aspnet:8.0
+    container_name: cyzor-webhook-receiver
+    ports:
+      - "7000:7000"
+    environment:
+      ASPNETCORE_URLS: http://+:7000
+      ASPNETCORE_ENVIRONMENT: Production
+      CYZOR_WEBHOOK_SECRET: cyzor_webhook_secret_2024
+      SLACK_WEBHOOK_URL: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX
+    restart: unless-stopped
+    networks:
+      - cyzor-network
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.cyzor-webhook.rule: "Host(`webhooks.cyzor.com.br`)"
+      traefik.http.routers.cyzor-webhook.entrypoints: "web,websecure"
+      traefik.http.services.cyzor-webhook.loadbalancer.server.port: "7000"
+      traefik.http.routers.cyzor-webhook.tls: "true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+networks:
+  cyzor-network:
+    external: true
+    name: dokploy-network
+
+volumes:
+  cyzor-data:
+    driver: local
+  cyzor-builds:
+    driver: local

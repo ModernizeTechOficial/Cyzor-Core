@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-Cyzor.Provisioning-aee05639-6b7a-4d63-8591-d90529bc0e19</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cyzor.Core\Cyzor.Core.csproj" />
+    <ProjectReference Include="..\Cyzor.Infrastructure\Cyzor.Infrastructure.csproj" />
+    <ProjectReference Include="..\Cyzor.Contracts\Cyzor.Contracts.csproj" />
+  </ItemGroup>
+  
+  <!-- Optional: Run deploy script after publish when RunRemoteDeploy=true -->
+  <Target Name="PostPublishDeploy" AfterTargets="Publish" Condition="'$(RunRemoteDeploy)' == 'true'">
+    <Message Importance="High" Text="Running remote deploy script because RunRemoteDeploy=true" />
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\deploy\deploy.ps1&quot;" />
+  </Target>
+</Project>

@@ -1,0 +1,19 @@
+[Unit]
+Description=Cyzor Provisioning Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/dotnet /opt/cyzor_provisioning/Cyzor.Provisioning.dll
+Restart=on-failure
+User=root
+Environment=ASPNETCORE_ENVIRONMENT=Production
+# NOTE: Do NOT commit secrets into this file. Configure the runtime API key with one
+# of the following recommended approaches on the target server:
+# 1) systemd drop-in: /etc/systemd/system/cyzor-provisioning.service.d/env.conf
+#    containing: Environment=PROVISIONING_API_KEY="<your-secret>"
+# 2) /etc/default/cyzor-provisioning (sourced by a unit drop-in)
+# The deployment scripts will not write secrets into the repo unit file.
+
+[Install]
+WantedBy=multi-user.target

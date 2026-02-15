@@ -1,0 +1,58 @@
+# .gitignore para Cyzor Ecossistem
+
+# Build e binários
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.cache
+*.log
+*.vs/
+
+# Configurações de IDE
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Arquivos temporários
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swn
+*.DS_Store
+Thumbs.db
+
+# Publicações e pacotes
+publish/
+*.nupkg
+*.snupkg
+
+# Configs sensíveis
+appsettings.Development.json
+appsettings.Local.json
+*.secret.json
+*.env
+
+# SSH e chaves
+*.pem
+*.key
+*.pub
+
+# Outros
+node_modules/
+documents/
+tmp_*
+
+# Testes e relatórios
+e2e_test_full.sh
+test_*.sh
+test_*.ps1
+
+# Arquivos de provisionamento temporários
+cyzor_subdomains_map.conf
+cliente1_nginx.conf

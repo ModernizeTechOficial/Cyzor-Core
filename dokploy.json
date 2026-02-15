@@ -1,0 +1,137 @@
+{
+  "projectName": "Cyzor Ecosystem",
+  "version": "1.0.0",
+  "services": [
+    {
+      "id": "cyzor-provisioning",
+      "name": "Cyzor Provisioning API",
+      "type": "docker",
+      "dockerfile": "./Dockerfile",
+      "ports": [
+        {
+          "internal": 5000,
+          "external": 5000,
+          "protocol": "http"
+        }
+      ],
+      "environment": {
+        "ASPNETCORE_ENVIRONMENT": "Production",
+        "CYZOR_WEBHOOK_SECRET": "cyzor_webhook_secret_2024",
+        "Provisioning__Host": "72.60.247.117",
+        "Provisioning__User": "root",
+        "Provisioning__Password": "A@ndr0m3d434513754",
+        "Provisioning__AppType": "node",
+        "Provisioning__BuildsBasePath": "/var/www/builds",
+        "Provisioning__AppsBasePath": "/var/www",
+        "Logging__LogLevel__Default": "Information"
+      },
+      "domains": [
+        {
+          "name": "api.cyzor.com.br",
+          "ssl": true,
+          "path": "/"
+        }
+      ],
+      "healthCheck": {
+        "enabled": true,
+        "path": "/health",
+        "interval": 30,
+        "timeout": 3,
+        "retries": 3
+      },
+      "restart": "unless-stopped",
+      "replicas": 1,
+      "resources": {
+        "memory": "512Mi",
+        "cpu": "500m"
+      }
+    },
+    {
+      "id": "cyzor-webhook",
+      "name": "Cyzor Webhook Receiver",
+      "type": "docker",
+      "image": "mcr.microsoft.com/dotnet/aspnet:8.0",
+      "ports": [
+        {
+          "internal": 7000,
+          "external": 7000,
+          "protocol": "http"
+        }
+      ],
+      "environment": {
+        "ASPNETCORE_URLS": "http://+:7000",
+        "ASPNETCORE_ENVIRONMENT": "Production",
+        "CYZOR_WEBHOOK_SECRET": "cyzor_webhook_secret_2024",
+        "SLACK_WEBHOOK_URL": "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX"
+      },
+      "domains": [
+        {
+          "name": "webhooks.cyzor.com.br",
+          "ssl": true,
+          "path": "/"
+        }
+      ],
+      "healthCheck": {
+        "enabled": true,
+        "path": "/health",
+        "interval": 30,
+        "timeout": 3,
+        "retries": 3
+      },
+      "restart": "unless-stopped",
+      "replicas": 1,
+      "resources": {
+        "memory": "256Mi",
+        "cpu": "250m"
+      }
+    },
+    {
+      "id": "cyzor-nginx",
+      "name": "Cyzor Nginx Reverse Proxy",
+      "type": "docker",
+      "image": "nginx:latest",
+      "ports": [
+        {
+          "internal": 80,
+          "external": 80,
+          "protocol": "http"
+        },
+        {
+          "internal": 443,
+          "external": 443,
+          "protocol": "https"
+        }
+      ],
+      "volumes": [
+        {
+          "source": "./nginx-docker.conf",
+          "destination": "/etc/nginx/nginx.conf",
+          "readOnly": true
+        },
+        {
+          "source": "./certificates",
+          "destination": "/etc/nginx/certs",
+          "readOnly": true
+        }
+      ],
+      "restart": "unless-stopped",
+      "replicas": 1
+    }
+  ],
+  "database": {
+    "enabled": false,
+    "type": "postgresql"
+  },
+  "backups": {
+    "enabled": true,
+    "schedule": "0 2 * * *",
+    "retention": 7
+  },
+  "monitoring": {
+    "enabled": true,
+    "alerting": {
+      "slack": true,
+      "email": false
+    }
+  }
+}
